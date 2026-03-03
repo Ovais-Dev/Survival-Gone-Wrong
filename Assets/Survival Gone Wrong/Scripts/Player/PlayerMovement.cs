@@ -24,38 +24,40 @@ public class PlayerMovement : MonoBehaviour
     {
         moveAction = InputSystem.actions.FindAction("Move");
         rb = GetComponent<Rigidbody2D>();
-        lastMousePos = cursor.GetMousePosition();
+        lastMousePos = cursor.GetMouseWorldPosition();
     }
 
     // Update is called once per frame
     void Update()
     {
         moveInput = moveAction.ReadValue<Vector2>();
-        
+        moveInput = transform.TransformDirection(moveInput);
         LookAtCursor();
+        
     }
     private void FixedUpdate()
     {
-        moveInput = transform.TransformDirection(moveInput);
+        
         rb.linearVelocity = moveInput * moveSpeed;
-
     }
     void LookAtCursor()
     {
         if (!cursor) return;
-        if (cursor.GetMouseDelta().sqrMagnitude > 0.1f)
-        {
-            lookDir = cursor.GetMousePosition() - lastMousePos;
-            //if (lastMousePos != lookDir) lastMousePos = lookDir;
+        //if (cursor.GetMouseDelta().sqrMagnitude > 0.1f)
+        //{
+            //lookDir = cursor.GetMouseWorldPosition() - lastMousePos;
+            ////if (lastMousePos != lookDir) lastMousePos = lookDir;
+            //lookDir.Normalize();
+            Vector2 lookDir = cursor.GetMouseWorldPosition() - (Vector2)transform.position;
             lookDir.Normalize();
             float angle = MathF.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
             //float roat
-            transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.Euler(0f, 0f, angle),rotationSpeed*Time.deltaTime);
-        }
-        else
-        {
-            if(Vector2.Distance(cursor.GetMousePosition(), lastMousePos) > offset)
-            lastMousePos = cursor.GetMousePosition() - lookDir * offset;
-        }
+            transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.Euler(0f, 0f, angle),rotationSpeed*Time.fixedDeltaTime);
+        //}
+        //else
+        //{
+        //    if(Vector2.Distance(cursor.GetMouseWorldPosition(), lastMousePos) > offset)
+        //    lastMousePos = cursor.GetMouseWorldPosition() - lookDir * offset;
+        //}
     }
 }

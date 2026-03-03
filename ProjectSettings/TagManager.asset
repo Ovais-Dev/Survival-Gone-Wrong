@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Ground
+  - Obstacles
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -13,8 +16,8 @@ TagManager:
   - UI
   - Wall
   - Enemy
-  - 
-  - 
+  - Player
+  - Ground
   - 
   - 
   - 

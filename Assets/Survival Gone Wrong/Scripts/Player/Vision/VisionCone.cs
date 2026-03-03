@@ -10,27 +10,32 @@ public class VisionCone : MonoBehaviour
 
     public int rayCount = 50;
     public LayerMask obstacleMask;
-    
+    public LayerMask targetMask;
+
     [Header("Mesh Settings")]
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private MeshRenderer meshRenderer;
 
     [Header("Visual Settings")]
     [SerializeField] private Material normalMaterial;
-    [SerializeField] private Color visionColor = new Color(1, 1, 1, 0.3f);
-    [SerializeField] private Color redColor= new Color(1,0,0,0.3f);
+    [SerializeField] private Color normalColor = new Color(1, 1, 1, 0.3f);
+    [SerializeField] private Color detectedColor= new Color(1,0,0,0.3f);
     private Mesh mesh;
 
-    private int enemyLayerMask;
-
     private bool targetVisible;
+    MaterialPropertyBlock mpb;
     void Start()
     {
-        enemyLayerMask = 1 << 7; // Assuming enemies are on layer 6
+        
         mesh = new Mesh();
-        if(normalMaterial)normalMaterial.color = visionColor;
-        if (meshFilter)meshFilter.mesh = mesh;
+        mpb = new MaterialPropertyBlock();
+
         if (meshRenderer) meshRenderer.material = normalMaterial;
+        if (meshFilter)meshFilter.mesh = mesh;
+
+        if (normalMaterial) ChangeColor(normalColor);
+
+
     }
 
     void LateUpdate()
@@ -39,13 +44,13 @@ public class VisionCone : MonoBehaviour
         if(IsTargetVisible())
         {
             if(targetVisible) return;
-            if (normalMaterial) normalMaterial.color = redColor;
+            if (normalMaterial) ChangeColor(detectedColor);
             targetVisible = true;
         }
         else
         {
             if(!targetVisible) return;
-            if (normalMaterial) normalMaterial.color = visionColor;
+            if (normalMaterial) ChangeColor(normalColor);
             targetVisible = false;
         }
     }
@@ -91,7 +96,7 @@ public class VisionCone : MonoBehaviour
     }
     public bool IsTargetVisible()
     {
-        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, viewRadius, enemyLayerMask);
+        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, viewRadius, targetMask);
         foreach(var col in cols)
         {
             Vector2 dirToTarget = (col.transform.position - transform.position).normalized;
@@ -112,5 +117,11 @@ public class VisionCone : MonoBehaviour
         //Vector2 dirToTarget = (target.position - transform.position).normalized;
 
         return false;
+    }
+    void ChangeColor(Color col)
+    {
+        meshRenderer.GetPropertyBlock(mpb);
+        mpb.SetColor("_Color", col);
+        meshRenderer.SetPropertyBlock(mpb);
     }
 }

@@ -3,14 +3,20 @@ using UnityEngine.InputSystem;
 
 public class CursorObj : MonoBehaviour
 {
-    
+    public static CursorObj Instance;
+
     Vector2 mousePos; // screen
     Vector2 mouseDelta;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Confined;
+        //Cursor.visible = false;
+       // Cursor.lockState = CursorLockMode.Locked;
        // Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -30,7 +36,7 @@ public class CursorObj : MonoBehaviour
     {
         return mouseDelta;
     }
-    public Vector2 GetMousePosition()
+    public Vector2 GetMouseWorldPosition()
     {
         return Camera.main.ScreenToWorldPoint(mousePos);
     }
