@@ -4,7 +4,7 @@ public class EnemyHealth : Health
 {
     public override void Die()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Dead Enemies");
     }
 
     public override void Heal()

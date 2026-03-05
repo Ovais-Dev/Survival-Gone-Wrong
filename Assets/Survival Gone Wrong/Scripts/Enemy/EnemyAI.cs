@@ -21,11 +21,11 @@ public class EnemyAI : MonoBehaviour
     private EnemyState currentState;
     private InvestigatePhase investigatePhase;
     private List<Vector3> searchPoints = new List<Vector3>();
-    [SerializeField] private Transform[] searchPointPos;
+   
     //private int currentSearchIndex;
 
     private List<Vector3> patrolPoints = new List<Vector3>();
-    [SerializeField] private Transform[] patrolPointsPos;
+   
     private float waitTimer;
     private int currentPatrolIndex;
     private bool isRotating;
@@ -125,7 +125,7 @@ public class EnemyAI : MonoBehaviour
         {
             Vector3 pos = GetRandomReachablePoint(patrolRadius);
             patrolPoints.Add(pos);
-            patrolPointsPos[i].position = pos;
+            //patrolPointsPos[i].position = pos;
         }
         //Vector2 random = Random.insideUnitCircle * patrolRadius;
         //Vector3 patrolPoint = homePosition + new Vector3(random.x, random.y, 0);
@@ -184,7 +184,7 @@ public class EnemyAI : MonoBehaviour
             //searchPoints.Add(lastSeenPosition + new Vector3(random.x, random.y, 0));
             Vector3 pos = GetRandomReachablePoint(patrolRadius);
             searchPoints.Add(pos);
-            searchPointPos[i].position = pos;
+            //searchPointPos[i].position = pos;
         }
     }
     void PatrolRoutine()
@@ -292,39 +292,7 @@ public class EnemyAI : MonoBehaviour
             startRotation - randomAngle :
             startRotation + randomAngle;
     }
-    IEnumerator LookAround()
-    {
-        float randomAngle = Random.Range(50f, 90f);
-        bool turnRight = Random.value > 0.5f;
-
-        float startRotation = transform.eulerAngles.z;
-        float targetRotation = turnRight ?
-            startRotation - randomAngle :
-            startRotation + randomAngle;
-
-        float timer = 0f;
-        
-
-        while (timer < rotateDuration )
-        {
-            timer += Time.deltaTime;
-            float angle = Mathf.LerpAngle(startRotation, targetRotation, timer / rotateDuration);
-            transform.rotation = Quaternion.Euler(0, 0, angle);
-            yield return null;
-        }
-
-        //yield return new WaitForSeconds(waitTime);
-
-        //// Rotate back forward
-        //timer = 0f;
-        //while (timer < rotateDuration)
-        //{
-        //    timer += Time.deltaTime;
-        //    float angle = Mathf.LerpAngle(targetRotation, startRotation, timer / rotateDuration);
-        //    transform.rotation = Quaternion.Euler(0, 0, angle);
-        //    yield return null;
-        //}
-    }
+    
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.orange;
