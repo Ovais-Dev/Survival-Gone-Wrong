@@ -36,8 +36,10 @@ public class EnemyAI : MonoBehaviour
     private float searchWaitTime;
     private bool hasRotatedAtPoint;
 
+
     enum EnemyState
     {
+        Idle,
         Patrol,
         Chase,
         Investigate,
@@ -48,14 +50,20 @@ public class EnemyAI : MonoBehaviour
         GoingToLastSeen,
         SearchingPoints
     }
+
+    private EnemyAnimation enemyAnimation;
     void Start()
     {
         aiPath = GetComponent<AIPath>();
+        enemyAnimation = GetComponent<EnemyAnimation>();
         homePosition = transform.position;
 
         PickPatrolPoint();
         currentState = EnemyState.Patrol;
+        enemyAnimation.SetState(EnemyAnimation.AnimState.Idle);
+
         aiPath.destination = homePosition;
+        
     }
 
     void Update()
@@ -66,6 +74,7 @@ public class EnemyAI : MonoBehaviour
                 if (vision.IsTargetVisible())
                 {
                     currentState = EnemyState.Chase;
+                    enemyAnimation.SetState(EnemyAnimation.AnimState.Run);
                     break;
                 }
                 PatrolRoutine();
@@ -81,7 +90,7 @@ public class EnemyAI : MonoBehaviour
                 {
                     currentState = EnemyState.Investigate;
                     investigatePhase = InvestigatePhase.GoingToLastSeen;
-
+                    enemyAnimation.SetState(EnemyAnimation.AnimState.Move);
                     aiPath.destination = lastSeenPosition;
 
                     searchPoints.Clear();
@@ -95,6 +104,7 @@ public class EnemyAI : MonoBehaviour
                 if (vision.IsTargetVisible())
                 {
                     currentState = EnemyState.Chase;
+                    enemyAnimation.SetState(EnemyAnimation.AnimState.Run);
                     break;
                 }
                 SearchRoutine();
@@ -104,6 +114,7 @@ public class EnemyAI : MonoBehaviour
                 if (vision.IsTargetVisible())
                 {
                     currentState = EnemyState.Chase;
+                    enemyAnimation.SetState(EnemyAnimation.AnimState.Run);
                 }
                 else
                 {
@@ -111,12 +122,27 @@ public class EnemyAI : MonoBehaviour
                     {
                         PickPatrolPoint();
                         currentState = EnemyState.Patrol;
+                        enemyAnimation.SetState(EnemyAnimation.AnimState.Move);
                     }
                 }
                 break;
         }
+        AnimationHandler();
     }
+    void AnimationHandler()
+    {
+        if (aiPath.velocity.magnitude > 0)
+        {
 
+            enemyAnimation.SetState(EnemyAnimation.AnimState.Move);
+
+        }
+        else
+        {
+            enemyAnimation.SetState(EnemyAnimation.AnimState.Idle);
+
+        }
+    }
     void PickPatrolPoint()
     {
         patrolPoints.Clear();
