@@ -15,10 +15,14 @@ public class PlayerMovement : MonoBehaviour
     public float baseSound = 1f;
 
     float stepTimer;
-
+    [Header("Sound Delayer")]
     public float walkStepInterval = 0.45f;
+    [Space(5)]
     public float sprintStepInterval = 0.28f;
+    public float sprintSoundMultiplier = 2.5f;
+    [Space(5)]
     public float crouchStepInterval = 0.7f;
+    public float crouchSoundMultiplier = 0.3f;
 
     [SerializeField] private CursorObj cursor;
     [SerializeField] private float offset = 1f;
@@ -136,11 +140,11 @@ public class PlayerMovement : MonoBehaviour
         float baseSound = this.baseSound;
 
         if (isSprinting)
-            baseSound *= 2.5f;
+            baseSound *= sprintSoundMultiplier;
 
         if (isCrouching)
-            baseSound *= 0.3f;
+            baseSound *= crouchSoundMultiplier;
 
-        SoundManager.EmitSound(transform.position, baseSound, 10f);
+        SoundManager.EmitSound(transform.position, baseSound/*, 10f*/);
     }
 }

@@ -6,10 +6,10 @@ using UnityEngine.InputSystem;
 
 public class ShootingBase : MonoBehaviour
 {
+
     [Header("Gun Settings")]
-    [SerializeField]protected GameObject bulletPrefab;
+    [SerializeField] protected PoolingSystem bulletPooling;
     [SerializeField] protected float maxShootDistance = 5f;
-    [SerializeField] protected Transform bulletPoolParent;
 
     [Header("Fire Setting")]
     [SerializeField] protected float fireRate = 0.5f;
@@ -37,26 +37,52 @@ public class ShootingBase : MonoBehaviour
 
     [Header("Effects")]
     [SerializeField] protected ParticleSystem shootEffect;
-    [SerializeField] protected AudioClip shootSound;
+    [SerializeField] protected AudioClip shootSoundClip;
 
     protected float lastFireTime;
 
+    public virtual void SetWeapon(WeaponData _wpData)
+    {
+        bulletPooling.SetPoolingProperties(_wpData.bulletPrefab, 8);
+
+        maxShootDistance = _wpData.maxShootDistance;
+        damageAmount = _wpData.damageAmount;
+
+        fireRate = _wpData.fireRate;
+        reloadTime = _wpData.reloadTime;
+
+        infiniteAmmo = _wpData.infiniteAmmo;
+        maxAmmoCapacity = _wpData.maxAmmoCapacity;
+        maxMagazineSize = _wpData.maxMagazineSize;
+
+        shootEffect = _wpData.shootEffect;
+        shootSoundClip = _wpData.shootSoundClip;
+
+    }
    
     protected virtual void Shoot(Vector3 shootPos)
     {
         Vector2 dir = shootPos - firePoint.position;
         RaycastHit2D rayHit = Physics2D.Raycast(firePoint.position, dir, maxShootDistance,targetLayerMask);
         bool hit = rayHit.collider != null;
+        Vector2 hitPos;
         if (hit) {
-            if (rayHit.collider.CompareTag(targetTag))
-            {
-                rayHit.collider.GetComponent<Health>().TakeDamage(damageAmount);
-            }
+            hitPos = rayHit.point;
+            //if (rayHit.collider.CompareTag(targetTag))
+            //{
+            //    rayHit.collider.GetComponent<Health>().TakeDamage(damageAmount);
+            //}
         }
-        if(bulletPrefab)
+        else
         {
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity, bulletPoolParent);
-            bullet.GetComponent<Bullet>().Initialize(dir.normalized);
+            hitPos = dir * maxShootDistance;
+        }
+        if(bulletPooling)
+        {
+            GameObject bullet = bulletPooling.GetPoolObject();
+            bullet.SetActive(true);
+            bullet.transform.position = firePoint.position;
+            bullet.GetComponent<Bullet>().Initialize(hitPos,damageAmount);
         }
        
         PlayEffectAndSound();
@@ -95,6 +121,6 @@ public class ShootingBase : MonoBehaviour
     void PlayEffectAndSound()
     {
         if (shootEffect) shootEffect.Play();
-        if (shootSound) SoundManager.Instance.PlayClip(shootSound);
+        if (shootSoundClip) SoundManager.Instance.PlayClip(shootSoundClip);
     }
 }

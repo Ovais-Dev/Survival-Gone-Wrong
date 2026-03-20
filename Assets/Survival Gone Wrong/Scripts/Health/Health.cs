@@ -18,7 +18,7 @@ public abstract class Health : MonoBehaviour
     public virtual void TakeDamage(float damage)
     {
         health -= damage;
-        if (health < 0) Die(); //Die logic depending upon character types
+        if (health <= 0) Die(); //Die logic depending upon character types
     }
     public abstract void Heal();
     public abstract void Die();

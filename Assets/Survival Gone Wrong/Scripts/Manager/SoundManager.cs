@@ -24,12 +24,12 @@ public struct SoundEvent
 {
     public Vector3 position;
     public float intensity;
-    public float radius; // player pos
-    public SoundEvent(Vector3 pos, float i, float r)
+    //public float radius; // player pos
+    public SoundEvent(Vector3 pos, float i/*, float r*/)
     {
         position = pos;
         intensity = i;
-        radius = r;
+       // radius = r;
     }
 }
 
@@ -134,9 +134,9 @@ public class SoundManager : MonoBehaviour
 
     public static Action<SoundEvent> OnSoundEmitted;
 
-    public static void EmitSound(Vector3 position, float intensity, float radius)
+    public static void EmitSound(Vector3 position, float intensity/*, float radius*/)
     {
-        OnSoundEmitted?.Invoke(new SoundEvent(position, intensity,radius));
+        OnSoundEmitted?.Invoke(new SoundEvent(position, intensity/*,radius*/));
     }
 
     #endregion

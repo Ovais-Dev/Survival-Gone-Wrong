@@ -1,15 +1,28 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class PlayerShooting : ShootingBase
 {
     protected bool autoReload = true;
+
+    [Space(10)]
+    [SerializeField] private GameObject lightMuzzleEffect;
+    [SerializeField] private float lightMuzzleDuration = 0.1f;
+
+    [Space(10)]
+    [SerializeField] private float shootBaseSound = 5f;
     private void Start()
     {
         lastFireTime = Time.time;
         currentAmmo = maxAmmoCapacity;
         currentAmmoInMagazine = maxMagazineSize;
+    }
+    public override void SetWeapon(WeaponData _wpData)
+    {
+        base.SetWeapon(_wpData);
+        shootBaseSound = _wpData.shootBaseSound;
     }
     private void Update()
     {
@@ -35,7 +48,20 @@ public class PlayerShooting : ShootingBase
         {
             StartCoroutine(Reload());
         }
+        LightMuzzleEffect();
+        SoundManager.EmitSound(transform.position, shootBaseSound);
     }
-
-    
+    void LightMuzzleEffect()
+    {
+        if (!lightMuzzleEffect.activeInHierarchy)
+        {
+            StartCoroutine(InvokeLightEffect());
+        }
+    }
+    IEnumerator InvokeLightEffect()
+    {
+        lightMuzzleEffect.SetActive(true);
+        yield return new WaitForSeconds(lightMuzzleDuration);
+        lightMuzzleEffect.SetActive(false);
+    }
 }
