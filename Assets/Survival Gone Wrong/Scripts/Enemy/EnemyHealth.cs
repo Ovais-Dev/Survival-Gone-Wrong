@@ -10,9 +10,14 @@ public class EnemyHealth : Health
 
     public override void Heal()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Enemy Healed");
     }
 
+    public override void TakeDamage(float damage)
+    {
+        base.TakeDamage(damage);
+        GetComponent<ZombieAI>().Hurt();
+    }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 

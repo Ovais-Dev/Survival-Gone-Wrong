@@ -4,7 +4,7 @@ using Pathfinding;
 public class ZombieAI : MonoBehaviour
 {
     public Transform player;
-    public VisionCone vision;
+    //public VisionCone vision;
 
     [Header("Hearing")]
     public float hearingRadius = 6f;
@@ -12,31 +12,49 @@ public class ZombieAI : MonoBehaviour
     public float suspicionThreshold = 0.5f;
     public float amplifyHearingMultiplier = 3f;
     bool detected = false;
+    bool suspicious = false;
+
     [Header("Combat")]
     public float attackRange = 1.2f;
     public float attackCooldown = 1.2f;
     public int damage = 10;
 
+    [Header("Hurt")]
+    public float hurtCooldown = 0.5f;
+
     [Header("Detect")]
     public LayerMask obstacleMask;
 
+    [Header("Suspicious")]
+    private bool isSuspiciousCooldown;
+    public float suspiciousCooldownTime = 2f;
+
+    public Material litMat;
+    public Material outlineMat;
+
+    private SpriteRenderer spriteRenderer;
+    private float suspiciousTimer;
     private float attackTimer;
+    private float hurtTimer;
 
     private AIPath aiPath;
     private EnemyAnimation enemyAnimation;
 
     private Vector3 lastHeardPosition;
-    private Vector3 lastSeenPosition;
+    //private Vector3 lastSeenPosition;
 
-    private ZombieState currentState;
+    public ZombieState currentState;
+    private ZombieState previousStateBeforeHurt;
+    private ZombieState previousStateBeforeAttack;
 
-    enum ZombieState
+    
+    public enum ZombieState
     {
         Idle,
         Suspicious,
         Chase,
-        Search,
-        Attack
+        Attack,
+        Hurt
     }
 
     private void OnEnable()
@@ -49,6 +67,8 @@ public class ZombieAI : MonoBehaviour
     }
     void Start()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
         aiPath = GetComponent<AIPath>();
         enemyAnimation = GetComponent<EnemyAnimation>();
 
@@ -58,7 +78,7 @@ public class ZombieAI : MonoBehaviour
 
     void Update()
     {
-        CheckVision();
+       // CheckVision();
 
         switch (currentState)
         {
@@ -69,57 +89,64 @@ public class ZombieAI : MonoBehaviour
             case ZombieState.Suspicious:
                 aiPath.destination = lastHeardPosition;
 
-                if (!aiPath.pathPending && aiPath.reachedEndOfPath)
+                // Still moving to the heard location
+                float dist = Vector2.Distance(transform.position, lastHeardPosition);
+                if (dist>0.5f)
                 {
+                    isSuspiciousCooldown = false;
+                    suspiciousTimer = 0f;
+                    break;
+                }
+
+                // Reached location -> start suspicious cooldown
+                //aiPath.destination = transform.position;
+
+                if (!isSuspiciousCooldown)
+                {
+                    isSuspiciousCooldown = true;
+                    suspiciousTimer = 0f;
+                }
+
+                suspiciousTimer += Time.deltaTime;
+                //Debug.Log(suspiciousTimer);
+                if (suspiciousTimer >= suspiciousCooldownTime)
+                {
+                    isSuspiciousCooldown = false;
+                    suspiciousTimer = 0f;
                     currentState = ZombieState.Idle;
+                    suspicious = false;
+                    spriteRenderer.material = litMat;
                 }
                 break;
-
             case ZombieState.Chase:
                 aiPath.destination = player.position;
-
+                lastHeardPosition = player.position;
                 if (Vector3.Distance(transform.position, player.position) <= attackRange)
                 {
+                    previousStateBeforeAttack = ZombieState.Chase;
                     currentState = ZombieState.Attack;
                 }
-                else if (!vision.IsTargetVisible())
-                {
-                    lastHeardPosition = player.position;
-                    currentState = ZombieState.Search;
-                    detected = false;
-                }
                 break;
-
-            case ZombieState.Search:
-                aiPath.destination = lastHeardPosition;
-
-                if (!aiPath.pathPending && aiPath.reachedEndOfPath)
-                {
-                    currentState = ZombieState.Idle;
-                }
-                break;
-
             case ZombieState.Attack:
                 HandleAttack();
+                break;
+            case ZombieState.Hurt:
+                HandleHurt();
                 break;
         }
 
         AnimationHandler();
     }
 
-    void CheckVision()
-    {
-        if (vision.IsTargetVisible())
-        {
-            lastSeenPosition = player.position;
-            currentState = ZombieState.Chase;
-        }
-    }
 
     void HandleAttack()
     {
         aiPath.destination = transform.position;
-
+        if (Vector3.Distance(transform.position, player.position) > attackRange)
+        {
+            currentState = previousStateBeforeAttack;
+            return;
+        }
         attackTimer += Time.deltaTime;
 
         if (attackTimer >= attackCooldown)
@@ -140,11 +167,41 @@ public class ZombieAI : MonoBehaviour
             currentState = ZombieState.Chase;
         }
     }
+    void HandleHurt()
+    {
+        aiPath.destination = transform.position;
+        hurtTimer += Time.deltaTime;
 
+        if (hurtTimer >= hurtCooldown)
+        {
+            hurtTimer = 0f;
+
+            if (previousStateBeforeHurt == ZombieState.Attack)
+            {
+                if (Vector3.Distance(transform.position, player.position) <= attackRange)
+                    currentState = ZombieState.Attack;
+                else
+                    currentState = ZombieState.Chase;
+            }
+            else
+            {
+                currentState = previousStateBeforeHurt;
+            }
+        }
+    }
     void AnimationHandler()
     {
         if (currentState == ZombieState.Attack)
+        {
+            enemyAnimation.SetState(EnemyAnimation.AnimState.Attack);
             return;
+        }
+
+        if (currentState == ZombieState.Hurt)
+        {
+            enemyAnimation.SetState(EnemyAnimation.AnimState.Idle); // replace with Hurt if you add one
+            return;
+        }
 
         if (aiPath.velocity.magnitude > 0.1f)
         {
@@ -163,12 +220,24 @@ public class ZombieAI : MonoBehaviour
 
     public void HearSound(SoundEvent sound)
     {
+        if (currentState == ZombieState.Hurt)
+            return;
+
         float distance = Vector3.Distance(transform.position, sound.position);
 
         if (distance > hearingRadius)
+        {
+            if (aiPath.pathPending || !aiPath.reachedDestination)
+                currentState = ZombieState.Suspicious;
+            else
+                currentState = ZombieState.Idle;
+            //currentState = suspicious ? ZombieState.Suspicious : ZombieState.Idle;
+            detected = false;
+            if (!suspicious) spriteRenderer.material = litMat;
             return;
+        }
 
-        float perceivedSound = sound.intensity * (1f - distance / hearingRadius) * (detected?amplifyHearingMultiplier:1f);
+        float perceivedSound = sound.intensity * (1f - distance / hearingRadius) * (suspicious?amplifyHearingMultiplier:1f);
 
         if (Physics2D.Linecast(transform.position, sound.position, obstacleMask))
         {
@@ -177,25 +246,52 @@ public class ZombieAI : MonoBehaviour
 
         if (perceivedSound >= detectThreshold)
         {
-            lastHeardPosition = sound.position;
-            currentState = ZombieState.Chase;
-            detected = true;
+            Detected(sound.position);
         }
         else if (perceivedSound >= suspicionThreshold)
         {
-            lastHeardPosition = sound.position;
-
-            if (currentState != ZombieState.Chase)
-                currentState = ZombieState.Suspicious;
+            if (currentState == ZombieState.Chase && distance < hearingRadius) return;
+            Suspicious(sound.position);
         }
 
     }
 
     // bullet hit reaction
-    public void OnHit(Vector3 hitSource)
+    public void Detected(Vector3 sourcePos)
     {
-        lastHeardPosition = hitSource;
+        if (currentState == ZombieState.Hurt || currentState == ZombieState.Chase)
+            return;
+        lastHeardPosition = sourcePos;
         currentState = ZombieState.Chase;
         detected = true;
+        spriteRenderer.material = outlineMat;
+    }
+    public void Suspicious(Vector3 sourcePos)
+    {
+        if (currentState == ZombieState.Hurt)
+            return;
+        lastHeardPosition = sourcePos;
+        if (currentState != ZombieState.Chase && currentState != ZombieState.Attack)
+        {
+            currentState = ZombieState.Suspicious;
+            suspicious = true;
+        }
+    }
+
+    public void Hurt()
+    {
+        lastHeardPosition = player.position;
+        detected = true;
+        suspicious = true;
+        spriteRenderer.material = outlineMat;
+
+        previousStateBeforeHurt = currentState!=ZombieState.Hurt?currentState:ZombieState.Idle;
+        currentState = ZombieState.Hurt;
+        hurtTimer = 0f;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(lastHeardPosition, 1f);
     }
 }

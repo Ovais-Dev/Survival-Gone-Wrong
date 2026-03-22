@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     public float crouchSoundMultiplier = 0.3f;
 
     [SerializeField] private CursorObj cursor;
-    [SerializeField] private float offset = 1f;
+   // [SerializeField] private float offset = 1f;
     private Vector2 moveInput;
 
     private Rigidbody2D rb;

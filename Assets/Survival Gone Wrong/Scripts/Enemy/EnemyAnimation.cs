@@ -9,6 +9,7 @@ public class EnemyAnimation : MonoBehaviour
         Move,
         Run,
         Attack,
+        Die
     }
 
     [Header("Sprite Renderer")]
