@@ -39,6 +39,7 @@ public class Bullet : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        collision.GetComponent<ZombieAI>()?.HitBack(moveDir);
         collision.GetComponent<Health>()?.TakeDamage(damage);
         Deactivate();
     }

@@ -21,6 +21,7 @@ public class ZombieAI : MonoBehaviour
 
     [Header("Hurt")]
     public float hurtCooldown = 0.5f;
+    public GameObject highlightLight;
 
     [Header("Detect")]
     public LayerMask obstacleMask;
@@ -29,8 +30,12 @@ public class ZombieAI : MonoBehaviour
     private bool isSuspiciousCooldown;
     public float suspiciousCooldownTime = 2f;
 
+    [Header("Materials Setup")]
     public Material litMat;
     public Material outlineMat;
+
+    [Header("Hit Back Feedback")]
+    [SerializeField] private float hitBackDist;
 
     private SpriteRenderer spriteRenderer;
     private float suspiciousTimer;
@@ -47,7 +52,8 @@ public class ZombieAI : MonoBehaviour
     private ZombieState previousStateBeforeHurt;
     private ZombieState previousStateBeforeAttack;
 
-    
+    Vector2 previousDir;
+
     public enum ZombieState
     {
         Idle,
@@ -116,6 +122,7 @@ public class ZombieAI : MonoBehaviour
                     currentState = ZombieState.Idle;
                     suspicious = false;
                     spriteRenderer.material = litMat;
+                    highlightLight.SetActive(false);
                 }
                 break;
             case ZombieState.Chase:
@@ -170,6 +177,7 @@ public class ZombieAI : MonoBehaviour
     void HandleHurt()
     {
         aiPath.destination = transform.position;
+        transform.up = previousDir;
         hurtTimer += Time.deltaTime;
 
         if (hurtTimer >= hurtCooldown)
@@ -233,7 +241,7 @@ public class ZombieAI : MonoBehaviour
                 currentState = ZombieState.Idle;
             //currentState = suspicious ? ZombieState.Suspicious : ZombieState.Idle;
             detected = false;
-            if (!suspicious) spriteRenderer.material = litMat;
+            if (!suspicious) { spriteRenderer.material = litMat; highlightLight.SetActive(false); }
             return;
         }
 
@@ -265,6 +273,7 @@ public class ZombieAI : MonoBehaviour
         currentState = ZombieState.Chase;
         detected = true;
         spriteRenderer.material = outlineMat;
+        highlightLight.SetActive(true);
     }
     public void Suspicious(Vector3 sourcePos)
     {
@@ -281,13 +290,21 @@ public class ZombieAI : MonoBehaviour
     public void Hurt()
     {
         lastHeardPosition = player.position;
+        previousDir = transform.up;
+
         detected = true;
         suspicious = true;
         spriteRenderer.material = outlineMat;
+        highlightLight.SetActive(true);
 
         previousStateBeforeHurt = currentState!=ZombieState.Hurt?currentState:ZombieState.Idle;
         currentState = ZombieState.Hurt;
         hurtTimer = 0f;
+
+    }
+    public void HitBack(Vector3 dir)
+    {
+        transform.position += dir * hitBackDist;
     }
     private void OnDrawGizmos()
     {

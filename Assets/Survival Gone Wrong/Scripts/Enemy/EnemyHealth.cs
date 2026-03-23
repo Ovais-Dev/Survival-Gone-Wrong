@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class EnemyHealth : Health
 {
+    [SerializeField] private GameObject deadEffect;
     public override void Die()
     {
         gameObject.SetActive(false);
+        Instantiate(deadEffect, transform.position, Quaternion.identity);
     }
 
 
