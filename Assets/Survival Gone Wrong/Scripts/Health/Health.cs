@@ -5,7 +5,6 @@ public abstract class Health : MonoBehaviour
     [SerializeField] protected float health;
 
     protected float MaxHealth { get; private set; }
-
     protected virtual void Start()
     {
         MaxHealth = health;

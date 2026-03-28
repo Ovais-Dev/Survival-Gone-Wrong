@@ -1,12 +1,14 @@
 using UnityEngine;
-
+using UnityEngine.Events;
 public class EnemyHealth : Health
 {
     [SerializeField] private GameObject deadEffect;
+    [SerializeField] protected UnityEvent onDieEvent;
     public override void Die()
     {
         gameObject.SetActive(false);
         Instantiate(deadEffect, transform.position, Quaternion.identity);
+        onDieEvent?.Invoke();
     }
 
 

@@ -41,8 +41,11 @@ public class ShootingBase : MonoBehaviour
 
     protected float lastFireTime;
 
+    protected bool canShoot = false;
     public virtual void SetWeapon(WeaponData _wpData)
     {
+        canShoot = true;
+
         bulletPooling.SetPoolingProperties(_wpData.bulletPrefab, 8);
 
         maxShootDistance = _wpData.maxShootDistance;

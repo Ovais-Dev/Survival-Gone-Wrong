@@ -18,6 +18,8 @@ public class PlayerShooting : ShootingBase
         lastFireTime = Time.time;
         currentAmmo = maxAmmoCapacity;
         currentAmmoInMagazine = maxMagazineSize;
+
+        Physics2D.queriesHitTriggers = false;
     }
     public override void SetWeapon(WeaponData _wpData)
     {
@@ -42,6 +44,7 @@ public class PlayerShooting : ShootingBase
     }
     protected override void Shoot(Vector3 shootPos)
     {
+        if(!canShoot)return;
         base.Shoot(shootPos);
         AmmoVariablesUpdate();
         if(currentAmmoInMagazine<=0 && autoReload)

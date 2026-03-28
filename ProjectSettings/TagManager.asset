@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - Gate
   - Gate Trigger
+  - LevelCollider
+  - KeyCard
   layers:
   - Default
   - TransparentFX
@@ -21,9 +23,9 @@ TagManager:
   - Player
   - Ground
   - Bullet
-  - 
-  - 
-  - 
+  - Environment
+  - EnvironmentObject
+  - Glow
   - 
   - 
   - 

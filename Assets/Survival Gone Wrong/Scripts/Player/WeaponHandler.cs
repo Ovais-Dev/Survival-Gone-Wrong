@@ -30,8 +30,8 @@ public class WeaponHandler : MonoBehaviour
             return;
         }
 
-        currentWeaponIndex = Mathf.Clamp(currentWeaponIndex, 0, weapons.Count - 1);
-        EquipWeapon(currentWeaponIndex);
+        currentWeaponIndex = -1;//Mathf.Clamp(currentWeaponIndex, 0, weapons.Count - 1);
+        //EquipWeapon(currentWeaponIndex);
     }
 
     private void OnEnable()
@@ -119,7 +119,12 @@ public class WeaponHandler : MonoBehaviour
 
         Debug.Log("Equipped Weapon: " + selectedWeapon.name);
     }
-
+    public void SetWeapon(WeaponData weaponData)
+    {
+        weapons.Add(weaponData);
+        NextWeapon();
+        
+    }
     public WeaponData GetCurrentWeapon()
     {
         if (weapons == null || weapons.Count == 0)

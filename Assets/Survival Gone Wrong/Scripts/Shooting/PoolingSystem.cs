@@ -31,6 +31,7 @@ public class PoolingSystem : MonoBehaviour
     }
     GameObject SpawnObject()
     {
+        if(poolObject == null) return null;
         GameObject poolObj = Instantiate(poolObject,poolContainer.transform);
         poolList.Add(poolObj);
         poolObj.SetActive(false);

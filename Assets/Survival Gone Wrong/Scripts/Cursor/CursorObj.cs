@@ -15,7 +15,7 @@ public class CursorObj : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //Cursor.visible = false;
+        Cursor.visible = false;
        // Cursor.lockState = CursorLockMode.Locked;
        // Cursor.lockState = CursorLockMode.Locked;
     }
@@ -31,6 +31,7 @@ public class CursorObj : MonoBehaviour
         {
             MakeVisible();
         }
+        transform.position = GetMouseWorldPosition();
     }
     public Vector2 GetMouseDelta()
     {
