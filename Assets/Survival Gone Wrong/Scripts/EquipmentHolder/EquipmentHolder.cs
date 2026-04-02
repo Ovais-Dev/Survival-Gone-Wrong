@@ -15,6 +15,8 @@ public class EquipmentHolder : MonoBehaviour,ITriggable, IInteractable
     public Material unlitMaterial;
     public Material litMaterial;
 
+    [Header("Audio Clip")]
+    [SerializeField] private AudioClip equipClip;
 
     bool holdingItems = true;
 
@@ -43,6 +45,7 @@ public class EquipmentHolder : MonoBehaviour,ITriggable, IInteractable
         interactEventCall?.Invoke();
 
         MessagePopup.Instance.HidePopup();
+        SoundManager.Instance.PlayClip(equipClip, Random.Range(0.5f, 0.8f));
     }
     public string TriggeredMessage()=>message;
     public bool ShowMessage()=>holdingItems;

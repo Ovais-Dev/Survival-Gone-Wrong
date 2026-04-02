@@ -93,6 +93,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnvironmentZone
   environmentCollider: {fileID: 7633413009058428009}
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 32768
+  environmentObjects: []
 --- !u!50 &1484863543596450752
 Rigidbody2D:
   serializedVersion: 5

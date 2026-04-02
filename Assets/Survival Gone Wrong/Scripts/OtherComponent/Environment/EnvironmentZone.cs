@@ -21,7 +21,7 @@ public class EnvironmentZone : MonoBehaviour
 
         Collider2D[] results = new Collider2D[20]; // adjust size if needed
         int count = environmentCollider.Overlap(filter, results);
-        Debug.Log(count);
+        //Debug.Log(count);
         for (int i = 0; i < count; i++)
         {
             //if(results[i].gameObject==null)continue;

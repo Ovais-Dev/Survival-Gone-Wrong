@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour
@@ -8,7 +8,8 @@ public class PlayerAnimation : MonoBehaviour
         Idle,
         Move,
         Run,
-        Crouch
+        Crouch,
+        Attack // ✅ NEW
     }
 
     [Header("Sprite Renderer")]
@@ -19,12 +20,14 @@ public class PlayerAnimation : MonoBehaviour
     public List<Sprite> moveSprites;
     public List<Sprite> runSprites;
     public List<Sprite> crouchSprites;
+    public List<Sprite> attackSprites; // ✅ NEW
 
     [Header("Animation Speed")]
     public float idleFPS = 4f;
     public float moveFPS = 8f;
     public float runFPS = 12f;
     public float crouchFPS = 4f;
+    public float attackFPS = 16f; // ✅ NEW (faster looks better)
 
     private AnimState currentState;
 
@@ -87,6 +90,11 @@ public class PlayerAnimation : MonoBehaviour
             case AnimState.Crouch:
                 currentSprites = crouchSprites;
                 currentFPS = crouchFPS;
+                break;
+
+            case AnimState.Attack: // ✅ NEW
+                currentSprites = attackSprites;
+                currentFPS = attackFPS;
                 break;
         }
     }

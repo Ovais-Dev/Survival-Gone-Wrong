@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Pathfinding;
 
 public class ZombieAI : MonoBehaviour
 {
+    public ZombieState currentState;
     public Transform player;
     //public VisionCone vision;
 
@@ -11,6 +12,7 @@ public class ZombieAI : MonoBehaviour
     public float detectThreshold = 0.7f;
     public float suspicionThreshold = 0.5f;
     public float amplifyHearingMultiplier = 3f;
+    public float obstacleHearingMultiplier = 0.5f;
     bool detected = false;
     bool suspicious = false;
 
@@ -30,12 +32,23 @@ public class ZombieAI : MonoBehaviour
     private bool isSuspiciousCooldown;
     public float suspiciousCooldownTime = 2f;
 
+    [Header("Path Obstruction")]
+    public float obstructionCheckDistance = 1.5f;
+    public LayerMask obstructionMask; // assign gate layer here
+
     [Header("Materials Setup")]
     public Material litMat;
     public Material outlineMat;
 
     [Header("Hit Back Feedback")]
     [SerializeField] private float hitBackDist;
+
+    [Header("Zombie Audio")]
+    [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField] private AudioClip suspiciousClip;
+   // [SerializeField] private AudioClip deathClip;
 
     private SpriteRenderer spriteRenderer;
     private float suspiciousTimer;
@@ -48,12 +61,12 @@ public class ZombieAI : MonoBehaviour
     private Vector3 lastHeardPosition;
     //private Vector3 lastSeenPosition;
 
-    public ZombieState currentState;
     private ZombieState previousStateBeforeHurt;
     private ZombieState previousStateBeforeAttack;
 
-    Vector2 previousDir;
 
+    Vector2 previousDir;
+    bool hasBeenTriggered = false;
     public enum ZombieState
     {
         Idle,
@@ -80,6 +93,8 @@ public class ZombieAI : MonoBehaviour
 
         currentState = ZombieState.Idle;
         enemyAnimation.SetState(EnemyAnimation.AnimState.Idle);
+
+        hasBeenTriggered = false;
     }
 
     void Update()
@@ -93,6 +108,12 @@ public class ZombieAI : MonoBehaviour
                 break;
 
             case ZombieState.Suspicious:
+                if (IsPathObstructed())
+                {
+                    currentState = ZombieState.Idle;
+                    aiPath.destination = transform.position;
+                    break;
+                }
                 aiPath.destination = lastHeardPosition;
 
                 // Still moving to the heard location
@@ -126,6 +147,12 @@ public class ZombieAI : MonoBehaviour
                 }
                 break;
             case ZombieState.Chase:
+                if (IsPathObstructed())
+                {
+                    currentState = ZombieState.Idle;
+                    aiPath.destination = transform.position;
+                    break;
+                }
                 aiPath.destination = player.position;
                 lastHeardPosition = player.position;
                 if (Vector3.Distance(transform.position, player.position) <= attackRange)
@@ -161,6 +188,9 @@ public class ZombieAI : MonoBehaviour
             attackTimer = 0f;
 
             enemyAnimation.SetState(EnemyAnimation.AnimState.Attack);
+
+            // 🔊 Play attack sound
+            PlaySound(attackClip);
 
             // damage player
             if (Vector3.Distance(transform.position, player.position) <= attackRange)
@@ -249,7 +279,7 @@ public class ZombieAI : MonoBehaviour
 
         if (Physics2D.Linecast(transform.position, sound.position, obstacleMask))
         {
-            perceivedSound *= 0.5f;
+            perceivedSound *= hasBeenTriggered ? obstacleHearingMultiplier : 0f;
         }
 
         if (perceivedSound >= detectThreshold)
@@ -263,10 +293,20 @@ public class ZombieAI : MonoBehaviour
         }
 
     }
+    bool IsPathObstructed()
+    {
+        Vector2 dir = (aiPath.destination - transform.position).normalized;
 
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, obstructionCheckDistance, obstructionMask);
+
+        Debug.DrawRay(transform.position, dir * obstructionCheckDistance, hit ? Color.red : Color.green);
+
+        return hit.collider != null;
+    }
     // bullet hit reaction
     public void Detected(Vector3 sourcePos)
     {
+        if (!hasBeenTriggered) hasBeenTriggered = true;
         if (currentState == ZombieState.Hurt || currentState == ZombieState.Chase)
             return;
         lastHeardPosition = sourcePos;
@@ -279,11 +319,16 @@ public class ZombieAI : MonoBehaviour
     {
         if (currentState == ZombieState.Hurt)
             return;
+
         lastHeardPosition = sourcePos;
+
         if (currentState != ZombieState.Chase && currentState != ZombieState.Attack)
         {
             currentState = ZombieState.Suspicious;
             suspicious = true;
+
+            // 🔊 Play growl once when becoming suspicious
+            PlaySound(suspiciousClip);
         }
     }
 
@@ -306,6 +351,16 @@ public class ZombieAI : MonoBehaviour
     {
         transform.position += dir * hitBackDist;
     }
+
+    void PlaySound(AudioClip clip)
+    {
+        if (audioSource && clip)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

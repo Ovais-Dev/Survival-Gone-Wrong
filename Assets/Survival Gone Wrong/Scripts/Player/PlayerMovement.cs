@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+[System.Serializable]
+public enum PlayerState { Normal, Attack, Die}
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
+    public PlayerState playerState = PlayerState.Normal;
     [Header("Speed Control Variables")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float sprintSpeedMultiplier = 2f;
@@ -23,6 +25,13 @@ public class PlayerMovement : MonoBehaviour
     [Space(5)]
     public float crouchStepInterval = 0.7f;
     public float crouchSoundMultiplier = 0.3f;
+
+    [Header("Footstep Audio")]
+    [SerializeField] private AudioSource footstepSource;
+
+    [SerializeField] private AudioClip walkClip;
+    [SerializeField] private AudioClip sprintClip;
+    [SerializeField] private AudioClip crouchClip;
 
     [SerializeField] private CursorObj cursor;
    // [SerializeField] private float offset = 1f;
@@ -63,6 +72,7 @@ public class PlayerMovement : MonoBehaviour
     }
     void AnimationHandler()
     {
+        if (playerState != PlayerState.Normal) return;
         if (moveInput.sqrMagnitude > 0.01f)
         {
             isCrouching = crouchAction.IsPressed();
@@ -85,7 +95,11 @@ public class PlayerMovement : MonoBehaviour
             playerAnim.SetState(PlayerAnimation.AnimState.Idle);
         }
     }
-
+    public void SetPlayerState(PlayerState pState)
+    {
+        playerState = pState;
+    }
+    public bool CheckMyState(PlayerState pState) => playerState == pState;
     private void FixedUpdate()
     {
         float multiplier = isCrouching ? crouchSpeedMultiplier : (isSprinting ? sprintSpeedMultiplier : 1f);
@@ -139,12 +153,27 @@ public class PlayerMovement : MonoBehaviour
     {
         float baseSound = this.baseSound;
 
+        AudioClip clipToPlay = walkClip;
+
         if (isSprinting)
+        {
             baseSound *= sprintSoundMultiplier;
-
-        if (isCrouching)
+            clipToPlay = sprintClip;
+        }
+        else if (isCrouching)
+        {
             baseSound *= crouchSoundMultiplier;
+            clipToPlay = crouchClip;
+        }
 
-        SoundManager.EmitSound(transform.position, baseSound/*, 10f*/);
+        // 🔊 Play actual audio
+        if (footstepSource && clipToPlay)
+        {
+            footstepSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f); // slight variation
+            footstepSource.PlayOneShot(clipToPlay);
+        }
+
+        // 👂 Keep your AI hearing system
+        SoundManager.EmitSound(transform.position, baseSound);
     }
 }

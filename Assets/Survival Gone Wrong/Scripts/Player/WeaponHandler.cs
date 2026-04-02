@@ -1,14 +1,14 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+using UnityEngine.Events;
 public class WeaponHandler : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerShooting playerShooting;
 
     [Header("Weapons")]
-    [SerializeField] private List<WeaponData> weapons = new List<WeaponData>();
+    private List<WeaponData> weapons => WeaponInventory.Instance.ownedWeapons;
     [SerializeField] private int currentWeaponIndex = 0;
 
     [Header("Input")]
@@ -19,6 +19,8 @@ public class WeaponHandler : MonoBehaviour
 
     private float lastScrollTime;
 
+    [Header("Events")]
+    public UnityEvent<WeaponData> onWeaponEquipped;
     private void Start()
     {
         if (playerShooting == null)
@@ -26,12 +28,12 @@ public class WeaponHandler : MonoBehaviour
 
         if (weapons == null || weapons.Count == 0)
         {
-            Debug.LogWarning("WeaponHandler: No weapons assigned.");
+            Debug.LogWarning("No weapons in inventory.");
             return;
         }
 
-        currentWeaponIndex = -1;//Mathf.Clamp(currentWeaponIndex, 0, weapons.Count - 1);
-        //EquipWeapon(currentWeaponIndex);
+        currentWeaponIndex = WeaponInventory.Instance.currentWeaponIndex;
+        EquipWeapon(currentWeaponIndex);
     }
 
     private void OnEnable()
@@ -112,18 +114,21 @@ public class WeaponHandler : MonoBehaviour
             return;
 
         currentWeaponIndex = index;
+
         WeaponData selectedWeapon = weapons[currentWeaponIndex];
 
         if (playerShooting != null)
             playerShooting.SetWeapon(selectedWeapon);
 
+        // ✅ INVOKE EVENT
+        onWeaponEquipped?.Invoke(selectedWeapon);
+
         Debug.Log("Equipped Weapon: " + selectedWeapon.name);
     }
     public void SetWeapon(WeaponData weaponData)
     {
-        weapons.Add(weaponData);
+        WeaponInventory.Instance.AddWeapon(weaponData);
         NextWeapon();
-        
     }
     public WeaponData GetCurrentWeapon()
     {

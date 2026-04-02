@@ -4,6 +4,9 @@ public class PlayerInteraction : MonoBehaviour
 {
     public bool haveKey = false;
 
+    [Header("Audio Clip")]
+    public AudioClip equipClip;
+
     bool haveUsedKey = false;
     bool insideInteractonZone = false;
     IInteractable interactable;
@@ -32,6 +35,7 @@ public class PlayerInteraction : MonoBehaviour
         if (collision.CompareTag("KeyCard"))
         {
             CollectKey();
+            SoundManager.Instance.PlayClip(equipClip);
             Destroy(collision.gameObject);
         }
         IInteractable i = collision.GetComponentInParent<IInteractable>();
@@ -47,12 +51,14 @@ public class PlayerInteraction : MonoBehaviour
             if(interactable!=null){
                 if (interactable is Gate g)
                 {
-                    if (!g.NeedKey()) return;
-                    if (haveKey)
+                    if (g.NeedKey())
                     {
-                        interactable.MakeInteractable();
-                        haveKey = false;
-                        //haveUsedKey = true;
+                        if (haveKey)
+                        {
+                            interactable.MakeInteractable();
+                            haveKey = false;
+                            //haveUsedKey = true;
+                        }
                     }
                     
                 }

@@ -135,6 +135,7 @@ MonoBehaviour:
   closed: 0
   keyCardNeeded: 0
   havePutKey: 0
+  gateBuzzer: {fileID: 8300000, guid: 99a6bf2cedf959c4eb7f2f91846dd1a1, type: 3}
 --- !u!1 &4727074727675954166
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,7 +237,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6965638871635985164}
   - component: {fileID: 1392591044874682370}
-  m_Layer: 6
+  m_Layer: 14
   m_Name: GateCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -3,12 +3,17 @@ using UnityEngine.Events;
 public class EnemyHealth : Health
 {
     [SerializeField] private GameObject deadEffect;
-    [SerializeField] protected UnityEvent onDieEvent;
+    [SerializeField] private bool spawnAtDead;
+    [SerializeField] private GameObject objectToBeSpawned;
+
+    [Space(10)]
+    public AudioClip deadClip;
     public override void Die()
     {
-        gameObject.SetActive(false);
         Instantiate(deadEffect, transform.position, Quaternion.identity);
-        onDieEvent?.Invoke();
+        if (spawnAtDead) Instantiate(objectToBeSpawned, transform.position, Quaternion.identity);
+        if (deadClip) SoundManager.Instance.PlayClip(deadClip);
+        gameObject.SetActive(false);
     }
 
 

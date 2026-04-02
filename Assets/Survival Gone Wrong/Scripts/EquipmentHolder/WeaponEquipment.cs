@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class WeaponEquipment : Equipment
 {
-    public WeaponData weapon;
+    public WeaponData weaponData;
     public override void Equip()
     {
-        FindFirstObjectByType<WeaponHandler>().SetWeapon(weapon);
+        FindFirstObjectByType<WeaponHandler>().SetWeapon(weaponData);
+       // WeaponInventory.Instance.AddWeapon(weaponData);
     }
 }

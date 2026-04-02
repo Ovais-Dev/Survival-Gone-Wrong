@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 [System.Serializable]
-public enum SoundType { Move, Collect, Reached, Defuse, Blast,};
+public enum SoundType { Collect, Equip};
 [System.Serializable]
 class Sounds
 {
@@ -122,6 +122,10 @@ public class SoundManager : MonoBehaviour
     public void PlayClip(AudioClip clip)
     {
         sfxSource.PlayOneShot(clip);
+    }
+    public void PlayClip(AudioClip clip, float volume)
+    {
+        sfxSource.PlayOneShot(clip, volume);
     }
     #endregion
 

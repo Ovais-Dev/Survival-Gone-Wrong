@@ -13,6 +13,12 @@ public class PlayerShooting : ShootingBase
 
     [Space(10)]
     [SerializeField] private float shootBaseSound = 5f;
+
+    [SerializeField] private PlayerAnimation playerAnimation;
+    [SerializeField] private PlayerMovement playerMovement;
+
+    [Header("Audio Clip")]
+    [SerializeField] private AudioClip shootClip;
     private void Start()
     {
         lastFireTime = Time.time;
@@ -28,18 +34,37 @@ public class PlayerShooting : ShootingBase
     }
     private void Update()
     {
-        if(Keyboard.current.rKey.wasPressedThisFrame && currentAmmoInMagazine<maxMagazineSize)
+        if (Keyboard.current.rKey.wasPressedThisFrame && currentAmmoInMagazine < maxMagazineSize)
         {
             StartCoroutine(Reload());
         }
-        if(isReloading || outOfAmmo) return;
 
-        if (Mouse.current.leftButton.isPressed)
+        if (isReloading || outOfAmmo)
         {
+            if (playerAnimation != null)
+                playerAnimation.SetState(PlayerAnimation.AnimState.Idle);
+            return;
+        }
+
+        bool isShooting = Mouse.current.leftButton.isPressed;
+
+        if (isShooting)
+        {
+            if (playerAnimation != null)
+            {
+                if (!playerMovement.CheckMyState(PlayerState.Attack)) playerMovement.SetPlayerState(PlayerState.Attack);
+                playerAnimation.SetState(PlayerAnimation.AnimState.Attack);
+            }
+
             if (lastFireTime + 1 / fireRate > Time.time) return;
+
             Vector3 mousePos = CursorObj.Instance.GetMouseWorldPosition();
             Shoot(mousePos);
             lastFireTime = Time.time;
+        }
+        else
+        {
+            if (!playerMovement.CheckMyState(PlayerState.Normal) && !playerMovement.CheckMyState(PlayerState.Die)) playerMovement.SetPlayerState(PlayerState.Normal);
         }
     }
     protected override void Shoot(Vector3 shootPos)
@@ -52,7 +77,9 @@ public class PlayerShooting : ShootingBase
             StartCoroutine(Reload());
         }
         LightMuzzleEffect();
-        SoundManager.EmitSound(transform.position, shootBaseSound);
+        UpdateAmmoUI();
+        SoundManager.EmitSound(transform.position, shootBaseSound); // for zombies attraction
+        SoundManager.Instance.PlayClip(shootClip, Random.Range(0.5f, 0.6f));
     }
     void LightMuzzleEffect()
     {
