@@ -48,6 +48,7 @@ public class ZombieAI : MonoBehaviour
 
     [SerializeField] private AudioClip attackClip;
     [SerializeField] private AudioClip suspiciousClip;
+    [SerializeField] private AudioClip hurtClip;
    // [SerializeField] private AudioClip deathClip;
 
     private SpriteRenderer spriteRenderer;
@@ -345,7 +346,7 @@ public class ZombieAI : MonoBehaviour
         previousStateBeforeHurt = currentState!=ZombieState.Hurt?currentState:ZombieState.Idle;
         currentState = ZombieState.Hurt;
         hurtTimer = 0f;
-
+        PlaySound(hurtClip);
     }
     public void HitBack(Vector3 dir)
     {
@@ -360,7 +361,6 @@ public class ZombieAI : MonoBehaviour
             audioSource.PlayOneShot(clip);
         }
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

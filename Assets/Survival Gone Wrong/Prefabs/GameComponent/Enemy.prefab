@@ -494,7 +494,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.4
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -799,7 +799,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 82ea68a891e7c26409bab7973a21460d, type: 2}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -997,7 +997,8 @@ MonoBehaviour:
   hitBackDist: 1
   audioSource: {fileID: 3816373653549369844}
   attackClip: {fileID: 8300000, guid: 4be25f172b061c34b9e7423d5d334d51, type: 3}
-  suspiciousClip: {fileID: 8300000, guid: a2a65fefd7f957e46b03ac855fa7c22a, type: 3}
+  suspiciousClip: {fileID: 8300000, guid: f8aaf23aa0b396544ae6d2023c13c153, type: 3}
+  hurtClip: {fileID: 8300000, guid: 8d8c1a97e167fa644b9f4f12166cdd0f, type: 3}
 --- !u!114 &4489371738795947148
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1012,9 +1013,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   health: 50
   deadEffect: {fileID: 4607107125785944146, guid: 6be06549362e1bf4cb6720312b7951fa, type: 3}
-  spawnAtDead: 0
-  objectToBeSpawned: {fileID: 0}
-  deadClip: {fileID: 8300000, guid: 5392ea0a4c78265499adf39950d837a4, type: 3}
+  spawnAtDead: 1
+  objectToBeSpawned: {fileID: 8346716196209120272, guid: b34ebaf922d6ffd4cb16dcbbc1104a1e, type: 3}
+  deadClip: {fileID: 8300000, guid: a2a65fefd7f957e46b03ac855fa7c22a, type: 3}
 --- !u!114 &3763271500726036268
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -78,6 +78,9 @@ public class PlayerShooting : ShootingBase
         }
         LightMuzzleEffect();
         UpdateAmmoUI();
+        //visual feedback
+        CameraShake.Instance.Shake(-transform.up);
+        //sound feedback
         SoundManager.EmitSound(transform.position, shootBaseSound); // for zombies attraction
         SoundManager.Instance.PlayClip(shootClip, Random.Range(0.5f, 0.6f));
     }

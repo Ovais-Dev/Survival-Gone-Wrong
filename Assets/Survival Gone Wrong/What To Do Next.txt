@@ -1,0 +1,6 @@
+make effect - heal effect, hurt effect, die effect
+make for enemies as well:
+
+on die transition black screen, like getting swallowed (i.e hollow circular getting filled with dark from surrounding) - then game over, to menu
+
+more level designing
